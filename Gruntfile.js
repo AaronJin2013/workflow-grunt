@@ -15,7 +15,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-cdn');
     grunt.loadNpmTasks('grunt-contrib-compass');
     grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-express-server');
+    grunt.loadNpmTasks('grunt-contrib-livereload');
 
 
     grunt.initConfig({
@@ -23,89 +25,38 @@ module.exports = function(grunt) {
         clean: {
             build: {
                 src: [
-                    '.tmp',
-                    'dest'
+                    'publish'
                 ]
             }
         },
-
-        copy: {
-            build: {
-                expand: true,
-                dot: true,
-                dest: 'dest',
-                src: ['app.js','package.json','index.html','app/**/*','asserts/**/*','!asserts/styles/**','!asserts/scripts/**']
-            }
-        },
-
-        useminPrepare: {
-            build: {
-                src:['index.html'],
-                options:{
-                    dest:'dest'
-                }
-            }
-        },
-
-        usemin: {
-            html:['dest/index.html']
-        },
-
-        ngmin: {
-            build: {
-                files: [{
-                    expand: true,
-                    src: '.tmp/concat/asserts/main.js',
-                    dest: '.tmp/concat/asserts/main.js'
-                }]
-            }
-        },
-
-        htmlmin: {
-            dist: {
+        express: {
+            options: {
+                // Override defaults here
+                //https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei
+            //    livereload 需要 chrome 安装插件
+            },
+            dev: {
                 options: {
-                    collapseWhitespace: true,
-                    collapseBooleanAttributes: true,
-                    removeCommentsFromCDATA: true,
-                    removeOptionalTags: true
-                },
-                files: [{
-                    expand:true,
-                    src:  'views/**/*.html',
-                    dest: '.tmp'
-                }]
-            }
-        },
-
-        html2js : {
-            build:{
-                src : '.tmp/views/**/*.html',
-                dest : '.tmp/concat/asserts/template.js',
-                options:{
-                    module:'app.template',
-                    base:'.tmp'
+                    script: 'app.js',
+                    livereload: true
                 }
             }
         },
-
-        uglify:{
-            build:{
-                src:'.tmp/concat/asserts/template.js',
-                dest:'dest/asserts/template.js'
+        watch: {
+            options: {
+                livereload: true,
+                nospawn: false
+            },
+            script: {
+                files: ["src/**/*.js"]
+            },
+            scss: {
+                files: ["src/**/*.scss"]
             }
         }
+
     });
 
-
-    grunt.registerTask('default', [
-        'clean',
-        'copy',
-        'useminPrepare',
-        'concat',
-        'htmlmin',
-        'html2js',
-        'uglify',
-        'cssmin',
-        'usemin'
-    ]);
+    grunt.registerTask('rebuild', ['clean']);
+    grunt.registerTask('default', ['express', 'watch']);
 }
